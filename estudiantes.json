@@ -1,0 +1,38 @@
+[
+  {
+    "id": "b1-1",
+    "nombre": "Juan Pablo",
+    "acudiente": "Mamá",
+    "telefono": "573225940033",
+    "barrio": "El Turbai",
+    "ruta": "Bachillerato - Parte 1",
+    "orden": 1,
+    "lat": 4.566,
+    "lng": -75.751,
+    "estado": "pendiente"
+  },
+  {
+    "id": "b1-2",
+    "nombre": "Nicolás Bedoya",
+    "acudiente": "Mamá",
+    "telefono": "573128840559",
+    "barrio": "El Turbai",
+    "ruta": "Bachillerato - Parte 1",
+    "orden": 2,
+    "lat": 4.5664,
+    "lng": -75.7514,
+    "estado": "pendiente"
+  },
+  {
+    "id": "b1-3",
+    "nombre": "Dilan Gañán",
+    "acudiente": "Abuela Teresa",
+    "telefono": "573206342481",
+    "barrio": "El Turbai",
+    "ruta": "Bachillerato - Parte 1",
+    "orden": 3,
+    "lat": 4.5668,
+    "lng": -75.7518,
+    "estado": "pendiente"
+  }
+]

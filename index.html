@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ruta Escolar Montenegro</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Control de ruta escolar</p>
+        <h1>Montenegro</h1>
+      </div>
+      <button id="btnConfigTop" class="icon-btn" type="button">⚙️</button>
+    </header>
+
+    <section class="hero card">
+      <div class="hero-row">
+        <div>
+          <p class="muted">Ruta activa</p>
+          <h2 id="rutaActivaTexto">Bachillerato - Parte 1</h2>
+        </div>
+        <select id="rutaSelect" class="input compact"></select>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <span>Actual</span>
+          <strong id="actualNombre">Sin iniciar</strong>
+          <small id="actualBarrio">---</small>
+        </div>
+        <div class="stat">
+          <span>Pendientes</span>
+          <strong id="pendientesCount">0</strong>
+          <small>por recoger</small>
+        </div>
+        <div class="stat">
+          <span>Canal</span>
+          <strong id="canalActivo">WhatsApp</strong>
+          <small id="backendEstado">Sin probar</small>
+        </div>
+      </div>
+      <div class="actions grid-actions">
+        <button id="btnIniciarRuta" class="btn primary" type="button">Iniciar ruta</button>
+        <button id="btnSubio" class="btn secondary" type="button">Estudiante subió</button>
+        <button id="btnAvisarActual" class="btn secondary" type="button">Avisar actual</button>
+        <button id="btnAvisarBarrio" class="btn secondary" type="button">Avisar barrio</button>
+      </div>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="orden" type="button">Orden</button>
+      <button class="tab" data-tab="mensajes" type="button">Mensajes</button>
+      <button class="tab" data-tab="ia" type="button">IA</button>
+      <button class="tab" data-tab="estudiantes" type="button">Estudiantes</button>
+      <button class="tab" data-tab="config" type="button">Config</button>
+    </nav>
+
+    <main>
+      <section id="tab-orden" class="panel active">
+        <div class="card">
+          <div class="title-row">
+            <h3>Orden de recogida</h3>
+            <button id="btnRefrescarOrden" class="btn ghost" type="button">Actualizar</button>
+          </div>
+          <div id="ordenLista" class="stack"></div>
+        </div>
+
+        <div class="card">
+          <div class="title-row">
+            <h3>GPS y mapa</h3>
+            <button id="btnGPS" class="btn secondary" type="button">Activar GPS</button>
+          </div>
+          <div class="gps-meta">
+            <strong id="gpsEstado">GPS apagado</strong>
+            <small id="gpsDetalle">Sin coordenadas</small>
+          </div>
+          <div id="map"></div>
+        </div>
+      </section>
+
+      <section id="tab-mensajes" class="panel">
+        <div class="card">
+          <div class="title-row">
+            <h3>Mensaje rápido</h3>
+            <select id="tipoMensaje" class="input compact"></select>
+          </div>
+          <div class="two-col">
+            <select id="destinoMensaje" class="input"></select>
+            <select id="tonoMensaje" class="input">
+              <option value="cercano">Tono cercano</option>
+              <option value="formal">Tono formal</option>
+              <option value="breve">Tono breve</option>
+            </select>
+          </div>
+          <textarea id="mensajePreview" class="textarea" placeholder="Aquí aparecerá el mensaje preparado"></textarea>
+          <div class="actions">
+            <button id="btnGenerarMensaje" class="btn secondary" type="button">Generar con IA</button>
+            <button id="btnEnviarMensaje" class="btn primary" type="button">Enviar ahora</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="title-row">
+            <h3>Bandeja de WhatsApp</h3>
+            <span id="queueStats" class="pill">0 pendientes</span>
+          </div>
+          <div class="actions grid-actions">
+            <button id="btnMasivoRuta" class="btn secondary" type="button">Alistamiento ruta</button>
+            <button id="btnLlegadaColegio" class="btn secondary" type="button">Llegada colegio</button>
+            <button id="btnProcesarCola" class="btn primary" type="button">Procesar bandeja</button>
+          </div>
+          <div id="colaMensajes" class="stack"></div>
+        </div>
+      </section>
+
+      <section id="tab-ia" class="panel">
+        <div class="card">
+          <h3>Asistente IA local</h3>
+          <textarea id="preguntaIA" class="textarea" placeholder="Ejemplo: redacta un aviso amable para retraso de 10 minutos"></textarea>
+          <div class="actions">
+            <button id="btnPreguntarIA" class="btn secondary" type="button">Responder</button>
+            <button id="btnUsarRespuestaIA" class="btn secondary" type="button">Usar en mensaje</button>
+          </div>
+          <div id="respuestaIA" class="ia-box">La IA organiza el texto, mejora el tono y prepara mensajes de alistamiento, barrio, cercanía, llegada y entrega.</div>
+        </div>
+      </section>
+
+      <section id="tab-estudiantes" class="panel">
+        <div class="card">
+          <h3>Listado de estudiantes</h3>
+          <div id="estudiantesLista" class="stack"></div>
+        </div>
+        <div class="card">
+          <h3>Agregar o editar</h3>
+          <form id="studentForm" class="form-stack">
+            <input id="studentId" type="hidden">
+            <input id="studentNombre" class="input" placeholder="Nombre del estudiante" required>
+            <input id="studentAcudiente" class="input" placeholder="Acudiente" required>
+            <input id="studentTelefono" class="input" placeholder="Celular en formato 57..." required>
+            <select id="studentRuta" class="input" required></select>
+            <select id="studentBarrio" class="input" required></select>
+            <input id="studentOrden" type="number" min="1" class="input" placeholder="Orden de recogida" required>
+            <div class="two-col">
+              <input id="studentLat" class="input" placeholder="Latitud opcional">
+              <input id="studentLng" class="input" placeholder="Longitud opcional">
+            </div>
+            <div class="actions">
+              <button class="btn primary" type="submit">Guardar</button>
+              <button id="btnLimpiarForm" class="btn secondary" type="button">Limpiar</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="tab-config" class="panel">
+        <div class="card">
+          <h3>Configuración de envío</h3>
+          <label class="label" for="modoEnvio">Modo</label>
+          <select id="modoEnvio" class="input">
+            <option value="open_whatsapp">Abrir WhatsApp</option>
+            <option value="business">WhatsApp Business</option>
+            <option value="demo">Demo</option>
+          </select>
+          <label class="label" for="backendUrl">URL backend</label>
+          <input id="backendUrl" class="input" placeholder="https://tu-worker.workers.dev">
+          <label class="label" for="apiKey">API key pública</label>
+          <input id="apiKey" class="input" placeholder="Clave del worker">
+          <div class="actions">
+            <button id="btnGuardarConfig" class="btn secondary" type="button">Guardar</button>
+            <button id="btnProbarBackend" class="btn secondary" type="button">Probar conexión</button>
+          </div>
+          <small class="helper">En modo Business la página envía al backend. En modo WhatsApp abre la app o WhatsApp Web con el mensaje listo.</small>
+        </div>
+
+        <div class="card">
+          <h3>Bitácora</h3>
+          <pre id="bitacora" class="log-box">Sin eventos todavía.</pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="ia.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
